@@ -1,0 +1,75 @@
+.ascii-mask-wrapper {
+  position: fixed;
+  inset: 0;
+  background: #000000;
+}
+
+.mask-handle {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  border-radius: 8px;
+  cursor: grab;
+  z-index: 10;
+  transform: translate(-50%, -50%);
+  border: 2px solid;
+  backdrop-filter: blur(2px);
+  pointer-events: auto;
+  touch-action: none;
+  transition: box-shadow 0.2s;
+}
+
+.mask-handle:active {
+  cursor: grabbing;
+}
+
+.mask-handle--waves {
+  border-color: rgba(85, 102, 204, 0.7);
+  background: rgba(85, 102, 204, 0.08);
+  box-shadow: 0 0 20px rgba(85, 102, 204, 0.25);
+}
+
+.mask-handle--waves:hover {
+  box-shadow: 0 0 30px rgba(85, 102, 204, 0.4);
+}
+
+.mask-handle--terrain {
+  border-color: rgba(224, 120, 80, 0.7);
+  background: rgba(224, 120, 80, 0.08);
+  box-shadow: 0 0 20px rgba(224, 120, 80, 0.25);
+}
+
+.mask-handle--terrain:hover {
+  box-shadow: 0 0 30px rgba(224, 120, 80, 0.4);
+}
+
+.mask-handle--flow {
+  border-color: rgba(184, 232, 160, 0.7);
+  background: rgba(184, 232, 160, 0.08);
+  box-shadow: 0 0 20px rgba(184, 232, 160, 0.25);
+}
+
+.mask-handle--flow:hover {
+  box-shadow: 0 0 30px rgba(184, 232, 160, 0.4);
+}
+
+.ascii-mask-back {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-decoration: none;
+}
+
+.ascii-mask-back:hover {
+  background: rgba(255, 255, 255, 0.25);
+}

@@ -8,6 +8,7 @@ import AsciiTexturesPreview from '../explorations/AsciiTextures/Preview'
 import AsciiFlowPreview from '../explorations/AsciiFlow/Preview'
 import AsciiTerrainPreview from '../explorations/AsciiTerrain/Preview'
 import AsciiWavesPreview from '../explorations/AsciiWaves/Preview'
+import AsciiMaskPreview from '../explorations/AsciiMask/Preview'
 import './Home.css'
 
 const explorations = [
@@ -20,6 +21,7 @@ const explorations = [
   { title: 'ASCII Flow', slug: 'ascii-flow', preview: AsciiFlowPreview },
   { title: 'ASCII Terrain', slug: 'ascii-terrain', preview: AsciiTerrainPreview },
   { title: 'ASCII Waves', slug: 'ascii-waves', preview: AsciiWavesPreview },
+  { title: 'ASCII Mask', slug: 'ascii-mask', preview: AsciiMaskPreview },
 ]
 
 export default function Home() {
