@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useControls } from 'leva'
 import { Physics, RigidBody, CuboidCollider } from '@react-three/rapier'
-import { MeshStandardNodeMaterial, PostProcessing } from 'three/webgpu'
+import { MeshStandardNodeMaterial, RenderPipeline } from 'three/webgpu'
 import { pass, screenUV, smoothstep } from 'three/tsl'
 import { bloom } from 'three/examples/jsm/tsl/display/BloomNode.js'
 import * as THREE from 'three'
@@ -93,7 +93,7 @@ function PostFX() {
   const { gl, scene, camera } = useThree()
 
   const postProcessing = useMemo(() => {
-    const pp = new PostProcessing(gl)
+    const pp = new RenderPipeline(gl)
     const scenePass = pass(scene, camera)
     const color = scenePass.getTextureNode()
 
