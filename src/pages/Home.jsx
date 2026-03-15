@@ -9,6 +9,9 @@ import AsciiFlowPreview from '../explorations/AsciiFlow/Preview'
 import AsciiTerrainPreview from '../explorations/AsciiTerrain/Preview'
 import AsciiWavesPreview from '../explorations/AsciiWaves/Preview'
 import AsciiMaskPreview from '../explorations/AsciiMask/Preview'
+import GraficosMetricasPreview from '../explorations/GraficosMetricas/Preview'
+import ParticleDataPreview from '../explorations/ParticleData/Preview'
+import KeyCubesPreview from '../explorations/KeyCubes/Preview'
 import './Home.css'
 
 const explorations = [
@@ -22,6 +25,9 @@ const explorations = [
   { title: 'ASCII Terrain', slug: 'ascii-terrain', preview: AsciiTerrainPreview },
   { title: 'ASCII Waves', slug: 'ascii-waves', preview: AsciiWavesPreview },
   { title: 'ASCII Mask', slug: 'ascii-mask', preview: AsciiMaskPreview },
+  { title: 'Gráficos y Métricas', slug: 'graficos-metricas', preview: GraficosMetricasPreview },
+  { title: 'Particle Data', slug: 'particle-data', preview: ParticleDataPreview },
+  { title: 'Key Cubes [WIP]', slug: 'key-cubes', preview: KeyCubesPreview },
 ]
 
 export default function Home() {
