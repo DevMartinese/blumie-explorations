@@ -4,6 +4,7 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { toCreasedNormals } from 'three-stdlib'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { useControls } from 'leva'
 import * as THREE from 'three'
 import './CursorKeys3D.css'
 
@@ -71,6 +72,14 @@ function KeyGrid() {
   const meshRefs = useRef([])
   const cursorPos = useRef(new THREE.Vector3(0, 0, -1000))
   const planeRef = useRef()
+  const timeRef = useRef(0)
+
+  const { animation, waveSpeed, waveAmplitude, waveFrequency } = useControls({
+    animation: { value: 'cursor', options: ['cursor', 'wave'], label: 'Animation' },
+    waveSpeed: { value: 2, min: 0.1, max: 10, step: 0.1, label: 'Wave Speed', render: (get) => get('animation') === 'wave' },
+    waveAmplitude: { value: 0.5, min: 0.1, max: 2, step: 0.05, label: 'Wave Amplitude', render: (get) => get('animation') === 'wave' },
+    waveFrequency: { value: 1.5, min: 0.1, max: 5, step: 0.1, label: 'Wave Frequency', render: (get) => get('animation') === 'wave' },
+  })
 
   // Spring state: [currentY, velocityY] per key
   const springState = useMemo(() => new Float32Array(count * 2), [count])
@@ -152,21 +161,27 @@ function KeyGrid() {
 
   useFrame((_, delta) => {
     const dt = Math.min(delta, 0.05)
-    const cx = cursorPos.current.x
-    const cz = cursorPos.current.z
+    timeRef.current += dt
 
     for (let i = 0; i < count; i++) {
       const key = keyData[i]
       const mesh = meshRefs.current[i]
       if (!mesh) continue
 
-      const dx = key.x - cx
-      const dz = key.z - cz
-      const dist = Math.sqrt(dx * dx + dz * dz)
-
       let targetY = 0
-      if (dist < PRESS_RADIUS) {
-        targetY = -PRESS_DEPTH * (1 - dist / PRESS_RADIUS)
+
+      if (animation === 'wave') {
+        targetY = waveAmplitude * Math.sin(waveFrequency * (key.x + key.z) + timeRef.current * waveSpeed)
+      } else {
+        const cx = cursorPos.current.x
+        const cz = cursorPos.current.z
+        const dx = key.x - cx
+        const dz = key.z - cz
+        const dist = Math.sqrt(dx * dx + dz * dz)
+
+        if (dist < PRESS_RADIUS) {
+          targetY = -PRESS_DEPTH * (1 - dist / PRESS_RADIUS)
+        }
       }
 
       const si = i * 2
