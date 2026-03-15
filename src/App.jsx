@@ -14,6 +14,7 @@ import GraficosMetricas from './explorations/GraficosMetricas'
 import ParticleData from './explorations/ParticleData'
 import KeyCubes from './explorations/KeyCubes'
 import LogoRain from './explorations/LogoRain'
+import CursorKeys3D from './explorations/CursorKeys3D'
 import './App.css'
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
       <Route path="/exploration/particle-data" element={<ParticleData />} />
       <Route path="/exploration/key-cubes" element={<KeyCubes />} />
       <Route path="/exploration/logo-rain" element={<LogoRain />} />
+      <Route path="/exploration/cursor-keys-3d" element={<CursorKeys3D />} />
       <Route
         path="/exploration/:slug"
         element={<div style={{ padding: 40, color: '#fff' }}>Exploration placeholder</div>}

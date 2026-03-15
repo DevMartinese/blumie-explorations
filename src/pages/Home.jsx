@@ -13,6 +13,7 @@ import GraficosMetricasPreview from '../explorations/GraficosMetricas/Preview'
 import ParticleDataPreview from '../explorations/ParticleData/Preview'
 import KeyCubesPreview from '../explorations/KeyCubes/Preview'
 import LogoRainPreview from '../explorations/LogoRain/Preview'
+import CursorKeys3DPreview from '../explorations/CursorKeys3D/Preview'
 import './Home.css'
 
 const explorations = [
@@ -30,6 +31,7 @@ const explorations = [
   { title: 'Particle Data', slug: 'particle-data', preview: ParticleDataPreview },
   { title: 'Key Cubes [WIP]', slug: 'key-cubes', preview: KeyCubesPreview },
   { title: 'Logo Rain [WIP]', slug: 'logo-rain', preview: LogoRainPreview },
+  { title: 'Cursor Keys 3D', slug: 'cursor-keys-3d', preview: CursorKeys3DPreview },
 ]
 
 export default function Home() {
