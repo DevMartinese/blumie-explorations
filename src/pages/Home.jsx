@@ -14,6 +14,9 @@ import ParticleDataPreview from '../explorations/ParticleData/Preview'
 import KeyCubesPreview from '../explorations/KeyCubes/Preview'
 import LogoRainPreview from '../explorations/LogoRain/Preview'
 import CursorKeys3DPreview from '../explorations/CursorKeys3D/Preview'
+import ConwayKeysPreview from '../explorations/ConwayKeys/Preview'
+import ConwayAsciiPreview from '../explorations/ConwayAscii/Preview'
+import AsciiBentoPreview from '../explorations/AsciiBento/Preview'
 import './Home.css'
 
 const explorations = [
@@ -32,6 +35,9 @@ const explorations = [
   { title: 'Key Cubes [WIP]', slug: 'key-cubes', preview: KeyCubesPreview },
   { title: 'Logo Rain [WIP]', slug: 'logo-rain', preview: LogoRainPreview },
   { title: 'Cursor Keys 3D', slug: 'cursor-keys-3d', preview: CursorKeys3DPreview },
+  { title: 'Conway Keys', slug: 'conway-keys', preview: ConwayKeysPreview },
+  { title: 'Conway ASCII', slug: 'conway-ascii', preview: ConwayAsciiPreview },
+  { title: 'ASCII Bento', slug: 'ascii-bento', preview: AsciiBentoPreview },
 ]
 
 export default function Home() {
