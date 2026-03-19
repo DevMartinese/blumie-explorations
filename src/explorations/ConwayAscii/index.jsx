@@ -9,6 +9,9 @@ const TILE_SIZE = 16
 const RADIUS = 3
 const FONT = 'bold 7px monospace'
 const TICK_MS = 200
+const SEED_WARMUP = 30
+const SEED_INTERVAL = 4
+const SEED_INTENSITY = 0.03
 
 const REGIONS = [
   { bg: '#FF8866', color: '#7A2200' },
@@ -32,6 +35,31 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.lineTo(x, y + r)
   ctx.quadraticCurveTo(x, y, x + r, y)
   ctx.closePath()
+}
+
+function seedFrontier(s, intensity) {
+  const { grid, cols, rows, colorIdx, symbolIdx } = s
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const idx = row * cols + col
+      if (grid[idx]) continue
+      // Check if any neighbor is alive
+      let hasAliveNeighbor = false
+      for (let dr = -1; dr <= 1 && !hasAliveNeighbor; dr++) {
+        for (let dc = -1; dc <= 1 && !hasAliveNeighbor; dc++) {
+          if (dr === 0 && dc === 0) continue
+          const nr = (row + dr + rows) % rows
+          const nc = (col + dc + cols) % cols
+          if (grid[nr * cols + nc]) hasAliveNeighbor = true
+        }
+      }
+      if (hasAliveNeighbor && Math.random() < intensity) {
+        grid[idx] = 1
+        colorIdx[idx] = Math.floor(Math.random() * REGIONS.length)
+        symbolIdx[idx] = Math.floor(Math.random() * SYMBOLS.length)
+      }
+    }
+  }
 }
 
 function stepConway(grid, cols, rows) {
@@ -86,14 +114,30 @@ export default function ConwayAscii() {
       const colorIdx = new Uint8Array(count)
       const symbolIdx = new Uint8Array(count)
 
+      // Start all dead
       for (let i = 0; i < count; i++) {
-        grid[i] = Math.random() < 0.3 ? 1 : 0
-        alpha[i] = grid[i] ? 1 : 0
         colorIdx[i] = Math.floor(Math.random() * REGIONS.length)
         symbolIdx[i] = Math.floor(Math.random() * SYMBOLS.length)
       }
 
-      stateRef.current = { grid, alpha, colorIdx, symbolIdx, cols, rows, lastTick: 0 }
+      // Place R-pentomino in center
+      //  .##
+      //  ##.
+      //  .#.
+      const cx = Math.floor(cols / 2)
+      const cy = Math.floor(rows / 2)
+      const rPentomino = [
+        [0, 1], [0, 2],
+        [1, 0], [1, 1],
+        [2, 1],
+      ]
+      for (const [dr, dc] of rPentomino) {
+        const idx = (cy + dr) * cols + (cx + dc)
+        grid[idx] = 1
+        alpha[idx] = 1
+      }
+
+      stateRef.current = { grid, alpha, colorIdx, symbolIdx, cols, rows, lastTick: 0, generation: 0 }
     }
 
     init()
@@ -106,8 +150,14 @@ export default function ConwayAscii() {
       // Step simulation
       if (now - s.lastTick > TICK_MS) {
         s.lastTick = now
+        s.generation++
         const prevGrid = s.grid
         s.grid = stepConway(s.grid, s.cols, s.rows)
+
+        // Frontier seeding after warmup
+        if (s.generation > SEED_WARMUP && s.generation % SEED_INTERVAL === 0) {
+          seedFrontier(s, SEED_INTENSITY)
+        }
 
         // Assign colors to newly born cells
         for (let i = 0; i < s.grid.length; i++) {
