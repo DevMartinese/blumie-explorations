@@ -43,12 +43,12 @@ function WaveGrid() {
   const count = GRID * GRID
 
   const { speed, amplitude, frequency, colorShift, shape, gap } = useControls({
-    shape: { value: 'roundedBox', options: ['box', 'roundedBox'], label: 'Shape' },
+    shape: { value: 'box', options: ['box', 'roundedBox'], label: 'Shape' },
     gap: { value: 0.08, min: 0, max: 0.3, step: 0.01, label: 'Gap' },
     speed: { value: 1.2, min: 0.1, max: 5, step: 0.1, label: 'Speed' },
     amplitude: { value: 1.0, min: 0.1, max: 2, step: 0.05, label: 'Amplitude' },
     frequency: { value: 0.8, min: 0.2, max: 3, step: 0.1, label: 'Frequency' },
-    colorShift: { value: 0.0, min: 0, max: 1, step: 0.01, label: 'Color Shift' },
+    colorShift: { value: 0.27, min: 0, max: 1, step: 0.01, label: 'Color Shift' },
   })
 
   const spacing = BASE_SIZE + gap
@@ -130,13 +130,13 @@ function CameraController() {
   const orbitRef = useRef()
 
   const [{ orbit, camX, camY, camZ, targetX, targetY, targetZ }, set] = useControls('Camera', () => ({
-    orbit: { value: false, label: 'Orbit Controls' },
-    camX: { value: 10, min: -30, max: 30, step: 0.5, label: 'Pos X' },
-    camY: { value: 8, min: 0, max: 30, step: 0.5, label: 'Pos Y' },
-    camZ: { value: 10, min: -30, max: 30, step: 0.5, label: 'Pos Z' },
-    targetX: { value: 0, min: -15, max: 15, step: 0.5, label: 'Target X' },
-    targetY: { value: 0, min: -5, max: 10, step: 0.5, label: 'Target Y' },
-    targetZ: { value: 0, min: -15, max: 15, step: 0.5, label: 'Target Z' },
+    orbit: { value: true, label: 'Orbit Controls' },
+    camX: { value: 11, min: -30, max: 30, step: 0.5, label: 'Pos X' },
+    camY: { value: 30, min: 0, max: 30, step: 0.5, label: 'Pos Y' },
+    camZ: { value: 10.5, min: -30, max: 30, step: 0.5, label: 'Pos Z' },
+    targetX: { value: 0.5, min: -15, max: 15, step: 0.5, label: 'Target X' },
+    targetY: { value: 0.5, min: -5, max: 10, step: 0.5, label: 'Target Y' },
+    targetZ: { value: -0.5, min: -15, max: 15, step: 0.5, label: 'Target Z' },
   }))
 
   // When switching from orbit back to manual, apply current slider values
@@ -179,10 +179,10 @@ const ENV_PRESETS = ['apartment', 'city', 'dawn', 'forest', 'lobby', 'night', 'p
 
 function Scene() {
   const { environment, envIntensity, background, bgBlur } = useControls('Environment', {
-    environment: { value: 'city', options: ['none', ...ENV_PRESETS], label: 'Preset' },
+    environment: { value: 'lobby', options: ['none', ...ENV_PRESETS], label: 'Preset' },
     envIntensity: { value: 1.0, min: 0, max: 3, step: 0.1, label: 'Intensity' },
-    background: { value: false, label: 'Show Background' },
-    bgBlur: { value: 0.5, min: 0, max: 1, step: 0.05, label: 'BG Blur' },
+    background: { value: true, label: 'Show Background' },
+    bgBlur: { value: 1.0, min: 0, max: 1, step: 0.05, label: 'BG Blur' },
   })
 
   const { bloomIntensity, bloomThreshold, bloomSmoothing } = useControls('Bloom', {
@@ -232,7 +232,7 @@ export default function WaveGeometry() {
         className="wave-geometry-canvas"
         style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh' }}
         camera={{
-          position: [10, 8, 10],
+          position: [11, 30, 10.5],
           fov: 30,
           near: 0.1,
           far: 100,
