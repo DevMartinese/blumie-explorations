@@ -1,6 +1,7 @@
 import { useRef, useMemo } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
+import { toCreasedNormals } from 'three-stdlib'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useControls } from 'leva'
@@ -8,23 +9,55 @@ import * as THREE from 'three'
 import './WaveGeometry.css'
 
 const GRID = 30
-const SPACING = 0.42
-const CUBE_SIZE = 0.35
+const BASE_SIZE = 0.35
 const MAX_HEIGHT = 3.5
 
 const tmpObj = new THREE.Object3D()
 const tmpColor = new THREE.Color()
 
+function createRoundedBoxGeo(size, radius, smoothness) {
+  const eps = 0.00001
+  const r = radius - eps
+  const shape = new THREE.Shape()
+  shape.absarc(eps, eps, eps, -Math.PI / 2, -Math.PI, true)
+  shape.absarc(eps, size - r * 2, eps, Math.PI, Math.PI / 2, true)
+  shape.absarc(size - r * 2, size - r * 2, eps, Math.PI / 2, 0, true)
+  shape.absarc(size - r * 2, eps, eps, 0, -Math.PI / 2, true)
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth: size - radius * 2,
+    bevelEnabled: true,
+    bevelSegments: 4,
+    steps: 1,
+    bevelSize: radius - eps,
+    bevelThickness: radius,
+    curveSegments: smoothness,
+  })
+  geo.center()
+  toCreasedNormals(geo, 0.4)
+  return geo
+}
+
 function WaveGrid() {
   const meshRef = useRef()
   const count = GRID * GRID
 
-  const { speed, amplitude, frequency, colorShift } = useControls({
+  const { speed, amplitude, frequency, colorShift, shape, gap } = useControls({
+    shape: { value: 'roundedBox', options: ['box', 'roundedBox'], label: 'Shape' },
+    gap: { value: 0.08, min: 0, max: 0.3, step: 0.01, label: 'Gap' },
     speed: { value: 1.2, min: 0.1, max: 5, step: 0.1, label: 'Speed' },
     amplitude: { value: 1.0, min: 0.1, max: 2, step: 0.05, label: 'Amplitude' },
     frequency: { value: 0.8, min: 0.2, max: 3, step: 0.1, label: 'Frequency' },
     colorShift: { value: 0.0, min: 0, max: 1, step: 0.01, label: 'Color Shift' },
   })
+
+  const spacing = BASE_SIZE + gap
+
+  const geometry = useMemo(() => {
+    if (shape === 'roundedBox') {
+      return createRoundedBoxGeo(BASE_SIZE, 0.06, 4)
+    }
+    return new THREE.BoxGeometry(BASE_SIZE, BASE_SIZE, BASE_SIZE)
+  }, [shape])
 
   const colorArray = useMemo(() => {
     const colors = new Float32Array(count * 3)
@@ -42,16 +75,15 @@ function WaveGrid() {
     if (!mesh) return
 
     const t = clock.getElapsedTime() * speed
-    const offsetX = ((GRID - 1) * SPACING) / 2
-    const offsetZ = ((GRID - 1) * SPACING) / 2
+    const offsetX = ((GRID - 1) * spacing) / 2
+    const offsetZ = ((GRID - 1) * spacing) / 2
 
     for (let row = 0; row < GRID; row++) {
       for (let col = 0; col < GRID; col++) {
         const i = row * GRID + col
-        const x = col * SPACING - offsetX
-        const z = row * SPACING - offsetZ
+        const x = col * spacing - offsetX
+        const z = row * spacing - offsetZ
 
-        // Two overlapping waves for organic shape
         const wave1 = Math.sin(frequency * (x * 0.8 + z * 0.6) + t)
         const wave2 = Math.sin(frequency * 0.7 * (x * 0.5 - z * 0.9) + t * 0.8 + 1.5)
         const wave3 = Math.cos(frequency * 0.5 * (x + z) + t * 0.6)
@@ -60,11 +92,10 @@ function WaveGrid() {
         const clampedH = Math.max(0.2, height)
 
         tmpObj.position.set(x, clampedH / 2, z)
-        tmpObj.scale.set(1, clampedH / CUBE_SIZE, 1)
+        tmpObj.scale.set(1, clampedH / BASE_SIZE, 1)
         tmpObj.updateMatrix()
         mesh.setMatrixAt(i, tmpObj.matrix)
 
-        // Color based on height
         const norm = (clampedH - 0.2) / MAX_HEIGHT
         const hue = 0.58 + colorShift * 0.15 + norm * 0.08
         const saturation = 0.7 + norm * 0.2
@@ -82,10 +113,8 @@ function WaveGrid() {
   })
 
   return (
-    <instancedMesh ref={meshRef} args={[null, null, count]} castShadow receiveShadow>
-      <boxGeometry args={[CUBE_SIZE, CUBE_SIZE, CUBE_SIZE]}>
-        <instancedBufferAttribute attach="attributes-color" args={[colorArray, 3]} />
-      </boxGeometry>
+    <instancedMesh key={shape} ref={meshRef} args={[geometry, null, count]} castShadow receiveShadow>
+      <instancedBufferAttribute attach="geometry-attributes-color" args={[colorArray, 3]} />
       <meshStandardMaterial
         vertexColors
         roughness={0.35}
