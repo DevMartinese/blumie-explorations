@@ -1,5 +1,5 @@
 import { useRef, useMemo } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { toCreasedNormals } from 'three-stdlib'
 import { Link } from 'react-router-dom'
@@ -124,9 +124,30 @@ function WaveGrid() {
   )
 }
 
+function CameraController() {
+  const { camera } = useThree()
+
+  const { camX, camY, camZ, targetX, targetY, targetZ } = useControls('Camera', {
+    camX: { value: 10, min: -30, max: 30, step: 0.5, label: 'Pos X' },
+    camY: { value: 8, min: 0, max: 30, step: 0.5, label: 'Pos Y' },
+    camZ: { value: 10, min: -30, max: 30, step: 0.5, label: 'Pos Z' },
+    targetX: { value: 0, min: -15, max: 15, step: 0.5, label: 'Target X' },
+    targetY: { value: 0, min: -5, max: 10, step: 0.5, label: 'Target Y' },
+    targetZ: { value: 0, min: -15, max: 15, step: 0.5, label: 'Target Z' },
+  })
+
+  useFrame(() => {
+    camera.position.set(camX, camY, camZ)
+    camera.lookAt(targetX, targetY, targetZ)
+  })
+
+  return null
+}
+
 function Scene() {
   return (
     <>
+      <CameraController />
       <color attach="background" args={['#0a0a1a']} />
       <fog attach="fog" args={['#0a0a1a', 12, 25]} />
       <ambientLight intensity={0.4} />
