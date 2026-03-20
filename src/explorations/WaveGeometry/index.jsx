@@ -1,7 +1,7 @@
 import { useRef, useMemo, useEffect } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
-import { OrbitControls } from '@react-three/drei'
+import { OrbitControls, Environment } from '@react-three/drei'
 import { toCreasedNormals } from 'three-stdlib'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
@@ -175,126 +175,42 @@ function CameraController() {
   ) : null
 }
 
-const ENVIRONMENTS = {
-  default: {
-    bg: '#0a0a1a',
-    fog: ['#0a0a1a', 12, 25],
-    ambient: { intensity: 0.4, color: '#ffffff' },
-    lights: [
-      { type: 'directional', position: [8, 12, 5], intensity: 1.2, color: '#aaccff', castShadow: true },
-      { type: 'directional', position: [-5, 8, -3], intensity: 0.5, color: '#6688ff' },
-      { type: 'point', position: [0, 6, 0], intensity: 0.4, color: '#88bbff' },
-    ],
-    bloom: { intensity: 0.5, threshold: 0.4, smoothing: 0.9 },
-  },
-  sunset: {
-    bg: '#1a0a0a',
-    fog: ['#1a0a0a', 12, 25],
-    ambient: { intensity: 0.3, color: '#ff8866' },
-    lights: [
-      { type: 'directional', position: [10, 6, 2], intensity: 1.5, color: '#ff6633', castShadow: true },
-      { type: 'directional', position: [-4, 10, -5], intensity: 0.4, color: '#ff9966' },
-      { type: 'point', position: [0, 8, 0], intensity: 0.6, color: '#ffaa44' },
-    ],
-    bloom: { intensity: 0.7, threshold: 0.3, smoothing: 0.8 },
-  },
-  arctic: {
-    bg: '#0a1020',
-    fog: ['#0a1020', 14, 28],
-    ambient: { intensity: 0.6, color: '#ccddff' },
-    lights: [
-      { type: 'directional', position: [5, 15, 8], intensity: 1.0, color: '#eef4ff', castShadow: true },
-      { type: 'directional', position: [-8, 6, -2], intensity: 0.6, color: '#aabbee' },
-      { type: 'point', position: [0, 5, 0], intensity: 0.3, color: '#ffffff' },
-    ],
-    bloom: { intensity: 0.3, threshold: 0.5, smoothing: 0.9 },
-  },
-  neon: {
-    bg: '#05050f',
-    fog: ['#05050f', 10, 22],
-    ambient: { intensity: 0.2, color: '#ffffff' },
-    lights: [
-      { type: 'directional', position: [6, 10, 4], intensity: 0.8, color: '#ff00ff', castShadow: true },
-      { type: 'directional', position: [-6, 8, -4], intensity: 0.8, color: '#00ffff' },
-      { type: 'point', position: [0, 6, 0], intensity: 0.6, color: '#aa44ff' },
-    ],
-    bloom: { intensity: 1.0, threshold: 0.2, smoothing: 0.7 },
-  },
-  studio: {
-    bg: '#111111',
-    fog: ['#111111', 18, 35],
-    ambient: { intensity: 0.5, color: '#ffffff' },
-    lights: [
-      { type: 'directional', position: [10, 14, 8], intensity: 1.4, color: '#ffffff', castShadow: true },
-      { type: 'directional', position: [-8, 10, -6], intensity: 0.7, color: '#ddddff' },
-      { type: 'point', position: [3, 4, 3], intensity: 0.3, color: '#ffffff' },
-    ],
-    bloom: { intensity: 0.2, threshold: 0.6, smoothing: 0.9 },
-  },
-  forest: {
-    bg: '#060f06',
-    fog: ['#060f06', 10, 22],
-    ambient: { intensity: 0.3, color: '#88aa66' },
-    lights: [
-      { type: 'directional', position: [7, 14, 3], intensity: 1.0, color: '#aacc77', castShadow: true },
-      { type: 'directional', position: [-4, 6, -6], intensity: 0.4, color: '#66aa44' },
-      { type: 'point', position: [0, 5, 0], intensity: 0.5, color: '#ccff88' },
-    ],
-    bloom: { intensity: 0.4, threshold: 0.35, smoothing: 0.85 },
-  },
-}
-
-function Lighting({ env }) {
-  const config = ENVIRONMENTS[env] || ENVIRONMENTS.default
-
-  return (
-    <>
-      <color attach="background" args={[config.bg]} />
-      <fog attach="fog" args={config.fog} />
-      <ambientLight intensity={config.ambient.intensity} color={config.ambient.color} />
-      {config.lights.map((light, i) =>
-        light.type === 'directional' ? (
-          <directionalLight
-            key={`${env}-d-${i}`}
-            position={light.position}
-            intensity={light.intensity}
-            color={light.color}
-            castShadow={light.castShadow || false}
-          />
-        ) : (
-          <pointLight
-            key={`${env}-p-${i}`}
-            position={light.position}
-            intensity={light.intensity}
-            color={light.color}
-          />
-        )
-      )}
-    </>
-  )
-}
+const ENV_PRESETS = ['apartment', 'city', 'dawn', 'forest', 'lobby', 'night', 'park', 'studio', 'sunset', 'warehouse']
 
 function Scene() {
-  const { environment } = useControls('Environment', {
-    environment: {
-      value: 'default',
-      options: Object.keys(ENVIRONMENTS),
-      label: 'Preset',
-    },
+  const { environment, envIntensity, background, bgBlur } = useControls('Environment', {
+    environment: { value: 'city', options: ['none', ...ENV_PRESETS], label: 'Preset' },
+    envIntensity: { value: 1.0, min: 0, max: 3, step: 0.1, label: 'Intensity' },
+    background: { value: false, label: 'Show Background' },
+    bgBlur: { value: 0.5, min: 0, max: 1, step: 0.05, label: 'BG Blur' },
   })
 
-  const bloom = (ENVIRONMENTS[environment] || ENVIRONMENTS.default).bloom
+  const { bloomIntensity, bloomThreshold, bloomSmoothing } = useControls('Bloom', {
+    bloomIntensity: { value: 0.5, min: 0, max: 2, step: 0.05, label: 'Intensity' },
+    bloomThreshold: { value: 0.4, min: 0, max: 1, step: 0.05, label: 'Threshold' },
+    bloomSmoothing: { value: 0.9, min: 0, max: 1, step: 0.05, label: 'Smoothing' },
+  })
 
   return (
     <>
       <CameraController />
-      <Lighting env={environment} />
+      {!background && <color attach="background" args={['#0a0a1a']} />}
+      {!background && <fog attach="fog" args={['#0a0a1a', 12, 25]} />}
+      {environment !== 'none' && (
+        <Environment
+          preset={environment}
+          background={background}
+          backgroundBlurriness={bgBlur}
+          environmentIntensity={envIntensity}
+        />
+      )}
+      <directionalLight position={[8, 12, 5]} intensity={0.6} color="#ffffff" castShadow />
       <WaveGrid />
       <EffectComposer>
         <Bloom
-          intensity={bloom.intensity}
-          luminanceThreshold={bloom.threshold}
-          luminanceSmoothing={bloom.smoothing}
+          intensity={bloomIntensity}
+          luminanceThreshold={bloomThreshold}
+          luminanceSmoothing={bloomSmoothing}
           mipmapBlur
         />
       </EffectComposer>
