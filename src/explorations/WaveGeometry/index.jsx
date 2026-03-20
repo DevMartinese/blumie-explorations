@@ -40,6 +40,7 @@ function createRoundedBoxGeo(size, radius, smoothness) {
 
 function WaveGrid() {
   const meshRef = useRef()
+  const flattenStartRef = useRef(null)
   const count = GRID * GRID
 
   const { speed, amplitude, frequency, colorShift, shape, gap } = useControls({
@@ -50,6 +51,21 @@ function WaveGrid() {
     frequency: { value: 0.8, min: 0.2, max: 3, step: 0.1, label: 'Frequency' },
     colorShift: { value: 0.27, min: 0, max: 1, step: 0.01, label: 'Color Shift' },
   })
+
+  const { flatten, flattenSpeed, flattenHeight } = useControls('Flatten', {
+    flatten: { value: false, label: 'Enable' },
+    flattenSpeed: { value: 0.5, min: 0.1, max: 2, step: 0.05, label: 'Speed' },
+    flattenHeight: { value: 0.5, min: 0.2, max: 2, step: 0.1, label: 'Height' },
+  })
+
+  // Track when flatten is toggled on/off
+  useEffect(() => {
+    if (flatten) {
+      flattenStartRef.current = null // will be set on first frame
+    } else {
+      flattenStartRef.current = null
+    }
+  }, [flatten])
 
   const spacing = BASE_SIZE + gap
 
@@ -78,6 +94,15 @@ function WaveGrid() {
     const t = clock.getElapsedTime() * speed
     const offsetX = ((GRID - 1) * spacing) / 2
     const offsetZ = ((GRID - 1) * spacing) / 2
+    const maxDist = Math.sqrt(offsetX * offsetX + offsetZ * offsetZ)
+
+    // Flatten progress: radial expansion from center
+    let flattenRadius = 0
+    if (flatten) {
+      if (flattenStartRef.current === null) flattenStartRef.current = clock.getElapsedTime()
+      const elapsed = clock.getElapsedTime() - flattenStartRef.current
+      flattenRadius = elapsed * flattenSpeed * maxDist * 0.5
+    }
 
     for (let row = 0; row < GRID; row++) {
       for (let col = 0; col < GRID; col++) {
@@ -89,7 +114,18 @@ function WaveGrid() {
         const wave2 = Math.sin(frequency * 0.7 * (x * 0.5 - z * 0.9) + t * 0.8 + 1.5)
         const wave3 = Math.cos(frequency * 0.5 * (x + z) + t * 0.6)
 
-        const height = (amplitude * (wave1 + wave2 * 0.6 + wave3 * 0.4) / 2 + 0.5) * MAX_HEIGHT + 0.2
+        let height = (amplitude * (wave1 + wave2 * 0.6 + wave3 * 0.4) / 2 + 0.5) * MAX_HEIGHT + 0.2
+
+        // Apply radial flatten from center
+        if (flatten && flattenRadius > 0) {
+          const dist = Math.sqrt(x * x + z * z)
+          const edge = 1.5 // smoothing width
+          const blend = Math.min(1, Math.max(0, (flattenRadius - dist) / edge))
+          // smoothstep
+          const s = blend * blend * (3 - 2 * blend)
+          height = height * (1 - s) + flattenHeight * s
+        }
+
         const clampedH = Math.max(0.2, height)
 
         tmpObj.position.set(x, clampedH / 2, z)
