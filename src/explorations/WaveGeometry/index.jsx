@@ -52,8 +52,9 @@ function WaveGrid() {
     colorShift: { value: 0.27, min: 0, max: 1, step: 0.01, label: 'Color Shift' },
   })
 
-  const { flatten, flattenSpeed, flattenHeight } = useControls('Flatten', {
+  const { flatten, flattenSpeed, flattenHeight, flattenDirection } = useControls('Flatten', {
     flatten: { value: false, label: 'Enable' },
+    flattenDirection: { value: 'radial', options: ['radial', 'left', 'right', 'front', 'back'], label: 'Direction' },
     flattenSpeed: { value: 0.5, min: 0.1, max: 2, step: 0.05, label: 'Speed' },
     flattenHeight: { value: 0.5, min: 0.2, max: 2, step: 0.1, label: 'Height' },
   })
@@ -94,14 +95,16 @@ function WaveGrid() {
     const t = clock.getElapsedTime() * speed
     const offsetX = ((GRID - 1) * spacing) / 2
     const offsetZ = ((GRID - 1) * spacing) / 2
-    const maxDist = Math.sqrt(offsetX * offsetX + offsetZ * offsetZ)
+    const maxExtent = flattenDirection === 'radial'
+      ? Math.sqrt(offsetX * offsetX + offsetZ * offsetZ)
+      : (flattenDirection === 'left' || flattenDirection === 'right') ? offsetX * 2 : offsetZ * 2
 
-    // Flatten progress: radial expansion from center
-    let flattenRadius = 0
+    // Flatten progress
+    let flattenProgress = 0
     if (flatten) {
       if (flattenStartRef.current === null) flattenStartRef.current = clock.getElapsedTime()
       const elapsed = clock.getElapsedTime() - flattenStartRef.current
-      flattenRadius = elapsed * flattenSpeed * maxDist * 0.5
+      flattenProgress = elapsed * flattenSpeed * maxExtent * 0.5
     }
 
     for (let row = 0; row < GRID; row++) {
@@ -116,12 +119,17 @@ function WaveGrid() {
 
         let height = (amplitude * (wave1 + wave2 * 0.6 + wave3 * 0.4) / 2 + 0.5) * MAX_HEIGHT + 0.2
 
-        // Apply radial flatten from center
-        if (flatten && flattenRadius > 0) {
-          const dist = Math.sqrt(x * x + z * z)
-          const edge = 1.5 // smoothing width
-          const blend = Math.min(1, Math.max(0, (flattenRadius - dist) / edge))
-          // smoothstep
+        // Apply flatten based on direction
+        if (flatten && flattenProgress > 0) {
+          let dist
+          if (flattenDirection === 'radial') dist = Math.sqrt(x * x + z * z)
+          else if (flattenDirection === 'left') dist = x + offsetX          // from -X edge
+          else if (flattenDirection === 'right') dist = offsetX - x         // from +X edge
+          else if (flattenDirection === 'front') dist = z + offsetZ         // from -Z edge
+          else dist = offsetZ - z                                           // from +Z edge (back)
+
+          const edge = 1.5
+          const blend = Math.min(1, Math.max(0, (flattenProgress - dist) / edge))
           const s = blend * blend * (3 - 2 * blend)
           height = height * (1 - s) + flattenHeight * s
         }
