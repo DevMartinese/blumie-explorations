@@ -18,6 +18,7 @@ import CursorKeys3D from './explorations/CursorKeys3D'
 import ConwayKeys from './explorations/ConwayKeys'
 import ConwayAscii from './explorations/ConwayAscii'
 import AsciiBento from './explorations/AsciiBento'
+import WaveGeometry from './explorations/WaveGeometry'
 import './App.css'
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
       <Route path="/exploration/conway-keys" element={<ConwayKeys />} />
       <Route path="/exploration/conway-ascii" element={<ConwayAscii />} />
       <Route path="/exploration/ascii-bento" element={<AsciiBento />} />
+      <Route path="/exploration/wave-geometry" element={<WaveGeometry />} />
       <Route
         path="/exploration/:slug"
         element={<div style={{ padding: 40, color: '#fff' }}>Exploration placeholder</div>}

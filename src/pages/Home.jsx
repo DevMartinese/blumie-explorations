@@ -17,6 +17,7 @@ import CursorKeys3DPreview from '../explorations/CursorKeys3D/Preview'
 import ConwayKeysPreview from '../explorations/ConwayKeys/Preview'
 import ConwayAsciiPreview from '../explorations/ConwayAscii/Preview'
 import AsciiBentoPreview from '../explorations/AsciiBento/Preview'
+import WaveGeometryPreview from '../explorations/WaveGeometry/Preview'
 import './Home.css'
 
 const explorations = [
@@ -38,6 +39,7 @@ const explorations = [
   { title: 'Conway Keys', slug: 'conway-keys', preview: ConwayKeysPreview },
   { title: 'Conway ASCII', slug: 'conway-ascii', preview: ConwayAsciiPreview },
   { title: 'ASCII Bento', slug: 'ascii-bento', preview: AsciiBentoPreview },
+  { title: 'Wave Geometry', slug: 'wave-geometry', preview: WaveGeometryPreview },
 ]
 
 export default function Home() {
